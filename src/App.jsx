@@ -23,6 +23,7 @@ function App() {
     handleDeleteCompleted,
     hasCompletedTodos,
     confirmDeleteCompleted,
+    onOrder,
   } = useTodoManager();
 
   return (
@@ -38,6 +39,7 @@ function App() {
         handleUpdate={handleUpdate}
         toggleComplete={toggleComplete}
         setDeletingId={setDeletingId}
+        onOrder={onOrder}
       />
       {
         <DeleteModal

@@ -13,15 +13,23 @@ export const useTodoManager = () => {
       const savedTodos = JSON.parse(
         localStorage.getItem(LOCAL_STORAGE_KEY) || "[]"
       );
-      setTodos(savedTodos);
+
+      const sortedSavedTodos = [...savedTodos].sort(
+        (a, b) => a.order - b.order
+      );
+      setTodos(sortedSavedTodos);
 
       try {
         const response = await fetch(API_URL);
 
         if (response.ok) {
           const serverTodos = await response.json();
-          setTodos(serverTodos);
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(serverTodos));
+          const sortedServerTodos = [...serverTodos].sort(
+            (a, b) => a.order - b.order
+          );
+          setTodos(sortedServerTodos);
+
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(sortedServerTodos));
         }
       } catch (error) {
         console.error("Loading data error", error);
@@ -178,6 +186,34 @@ export const useTodoManager = () => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todos));
     setIsDeletingCompleted(false);
   };
+  const onOrder = (activeId, overId) => {
+    if (!overId) return;
+
+    const activeIndex = todos.findIndex((todo) => todo.id === activeId);
+    const overIndex = todos.findIndex((todo) => todo.id === overId);
+    if (activeIndex === -1 || overIndex === -1 || activeIndex === overIndex)
+      return;
+
+    const newTodos = [...todos];
+    const [movedTodo] = newTodos.splice(activeIndex, 1);
+    newTodos.splice(overIndex, 0, movedTodo);
+
+    const updatedTodos = newTodos.map((todo, index) => ({
+      ...todo,
+      order: index + 1,
+    }));
+
+    setTodos(updatedTodos);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTodos));
+
+    updatedTodos.forEach((todo) => {
+      fetch(`${API_URL}/${todo.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order: todo.order }),
+      }).catch((err) => console.log("Update order failed", err));
+    });
+  };
 
   return {
     todos,
@@ -192,5 +228,6 @@ export const useTodoManager = () => {
     handleDeleteCompleted,
     hasCompletedTodos,
     confirmDeleteCompleted,
+    onOrder,
   };
 };
