@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
-import { API_URL } from "../constants/todos";
-import { createNewTodo, sortedSavedTodos } from "../helpers/todoHelpers";
-import { loadFromLocalStorage, savedToLocalStorage } from "../helpers/storage";
 import {
-  createTodo,
-  fetchTodos,
-  updateTodo,
+  createNewTodo,
+  sortedSavedTodos,
+  toggleTodoCompletion,
   updateTodoData,
-} from "../api/todoApi";
+} from "../helpers/todoHelpers";
+import { loadFromLocalStorage, savedToLocalStorage } from "../helpers/storage";
+import { createTodo, deleteTodo, fetchTodos, updateTodo } from "../api/todoApi";
 
 export const useTodoManager = () => {
   const [todos, setTodos] = useState([]);
@@ -80,10 +79,7 @@ export const useTodoManager = () => {
 
     if (!todoToUpdate) return;
 
-    const updatedTodo = {
-      ...todoToUpdate,
-      completed: !todoToUpdate.completed,
-    };
+    const updatedTodo = toggleTodoCompletion(todoToUpdate);
 
     const updatedTodos = todos.map((todo) =>
       todo.id === id ? updatedTodo : todo
@@ -92,11 +88,7 @@ export const useTodoManager = () => {
     setTodos(updatedTodos);
 
     try {
-      await fetch(`${API_URL}/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedTodo),
-      });
+      await updateTodo(id, updatedTodo);
 
       savedToLocalStorage(updatedTodos);
     } catch (error) {
@@ -111,7 +103,7 @@ export const useTodoManager = () => {
     setTodos(updatedTodos);
 
     try {
-      await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+      await deleteTodo(id);
       savedToLocalStorage(updatedTodos);
     } catch (error) {
       console.error("Delete Error", error);
@@ -139,7 +131,7 @@ export const useTodoManager = () => {
 
     for (const id of completedIds) {
       try {
-        await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+        await deleteTodo(id);
       } catch (error) {
         console.error(`Delete Task Error ${id}:`, error);
         failedIds.push(id);
@@ -178,11 +170,9 @@ export const useTodoManager = () => {
     savedToLocalStorage(updatedTodos);
 
     updatedTodos.forEach((todo) => {
-      fetch(`${API_URL}/${todo.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ order: todo.order }),
-      }).catch((err) => console.log("Update order failed", err));
+      updateTodo(todo.id, { order: todo.order }).catch((err) =>
+        console.log("Update order failed", err)
+      );
     });
   };
 

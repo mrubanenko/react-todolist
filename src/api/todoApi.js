@@ -16,12 +16,6 @@ export const createTodo = async (todo) => {
   return response.json();
 };
 
-export const updateTodoData = (todo, newText, newDeadline) => ({
-  ...todo,
-  text: newText,
-  deadline: newDeadline,
-});
-
 export const updateTodo = async (id, todo) => {
   const response = await fetch(`${API_URL}/${id}`, {
     method: "PUT",
@@ -30,4 +24,12 @@ export const updateTodo = async (id, todo) => {
   });
   if (!response.ok) throw new Error("Failed to update todo");
   return response.json();
+};
+
+export const deleteTodo = async (id) => {
+  const response = await fetch(`${API_URL}/${id}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error("Failed to delete todo");
+  return response;
 };

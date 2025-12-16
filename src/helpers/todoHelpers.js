@@ -10,3 +10,14 @@ export const createNewTodo = (text, deadline, order) => ({
   deadline: deadline || null,
   order,
 });
+
+export const updateTodoData = (todo, newText, newDeadline) => ({
+  ...todo,
+  text: newText,
+  deadline: newDeadline,
+});
+
+export const toggleTodoCompletion = (todo) => ({
+  ...todo,
+  completed: !todo.completed,
+});
