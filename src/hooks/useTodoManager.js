@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
-
-const LOCAL_STORAGE_KEY = "todos";
-const API_URL = "https://692f04bc91e00bafccd64475.mockapi.io/api/v1/todos";
+import { API_URL } from "../constants/todos";
+import { createNewTodo, sortedSavedTodos } from "../helpers/todoHelpers";
+import { loadFromLocalStorage, savedToLocalStorage } from "../helpers/storage";
+import {
+  createTodo,
+  fetchTodos,
+  updateTodo,
+  updateTodoData,
+} from "../api/todoApi";
 
 export const useTodoManager = () => {
   const [todos, setTodos] = useState([]);
@@ -10,27 +16,15 @@ export const useTodoManager = () => {
 
   useEffect(() => {
     const loadInitialData = async () => {
-      const savedTodos = JSON.parse(
-        localStorage.getItem(LOCAL_STORAGE_KEY) || "[]"
-      );
+      const savedTodos = sortedSavedTodos(loadFromLocalStorage());
 
-      const sortedSavedTodos = [...savedTodos].sort(
-        (a, b) => a.order - b.order
-      );
-      setTodos(sortedSavedTodos);
+      setTodos(savedTodos);
 
       try {
-        const response = await fetch(API_URL);
-
-        if (response.ok) {
-          const serverTodos = await response.json();
-          const sortedServerTodos = [...serverTodos].sort(
-            (a, b) => a.order - b.order
-          );
-          setTodos(sortedServerTodos);
-
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(sortedServerTodos));
-        }
+        const serverTodos = await fetchTodos();
+        const sortedServerTodos = sortedSavedTodos(serverTodos);
+        setTodos(sortedServerTodos);
+        savedToLocalStorage(sortedServerTodos);
       } catch (error) {
         console.error("Loading data error", error);
       }
@@ -39,34 +33,21 @@ export const useTodoManager = () => {
   }, []);
 
   const onAdd = async (text, deadline) => {
-    const newTodo = {
-      id: Date.now(),
-      text,
-      completed: false,
-      createdAt: new Date().toISOString(),
-      deadline: deadline || null,
-      order: todos.length + 1,
-    };
+    const newTodo = createNewTodo(text, deadline, todos.length + 1);
 
     const updatedTodos = [...todos, newTodo];
     setTodos(updatedTodos);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTodos));
+    savedToLocalStorage(updatedTodos);
 
     try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newTodo),
-      });
-
-      const createdTodo = await response.json();
+      const createdTodo = await createTodo(newTodo);
 
       const syncedTodos = updatedTodos.map((todo) =>
         todo.id === newTodo.id ? createdTodo : todo
       );
 
       setTodos(syncedTodos);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(syncedTodos));
+      savedToLocalStorage(syncedTodos);
     } catch (error) {
       console.error("Adding Error", error);
       setTodos(todos);
@@ -78,12 +59,7 @@ export const useTodoManager = () => {
 
     if (!todoToUpdate) return;
 
-    const updatedTodo = {
-      ...todoToUpdate,
-      text: text,
-      deadline: deadline,
-    };
-
+    const updatedTodo = updateTodoData(todoToUpdate, text, deadline);
     const updatedTodos = todos.map((todo) =>
       todo.id === id ? updatedTodo : todo
     );
@@ -91,13 +67,8 @@ export const useTodoManager = () => {
     setTodos(updatedTodos);
 
     try {
-      await fetch(`${API_URL}/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedTodo),
-      });
-
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTodos));
+      await updateTodo(id, updatedTodo);
+      savedToLocalStorage(updatedTodos);
     } catch (error) {
       console.log("Update Error", error);
       setTodos(todos);
@@ -127,7 +98,7 @@ export const useTodoManager = () => {
         body: JSON.stringify(updatedTodo),
       });
 
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTodos));
+      savedToLocalStorage(updatedTodos);
     } catch (error) {
       console.log("Update Error", error);
       setTodos(todos);
@@ -141,7 +112,7 @@ export const useTodoManager = () => {
 
     try {
       await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTodos));
+      savedToLocalStorage(updatedTodos);
     } catch (error) {
       console.error("Delete Error", error);
       setTodos(previousTodos);
@@ -183,7 +154,7 @@ export const useTodoManager = () => {
       );
     }
 
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todos));
+    savedToLocalStorage(todos);
     setIsDeletingCompleted(false);
   };
   const onOrder = (activeId, overId) => {
@@ -204,7 +175,7 @@ export const useTodoManager = () => {
     }));
 
     setTodos(updatedTodos);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedTodos));
+    savedToLocalStorage(updatedTodos);
 
     updatedTodos.forEach((todo) => {
       fetch(`${API_URL}/${todo.id}`, {

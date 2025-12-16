@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ToggleTheme from "./components/ToggleTheme";
-import { getInitialTheme } from "./components/helpers/getInitialTheme";
-import { toggleTheme } from "./components/helpers/toggleTheme";
+import { getInitialTheme } from "./helpers/getInitialTheme";
+import { toggleTheme } from "./helpers/toggleTheme";
 import DeleteModal from "./components/DeleteModal";
 import { useTodoManager } from "./hooks/useTodoManager";
 import DeleteCompletedBtn from "./components/DeteleCompletedBtn";
