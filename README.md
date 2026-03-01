@@ -2,6 +2,11 @@
 
 A feature-rich ToDo application built with React and Tailwind CSS for managing tasks efficiently.
 
+## Live Demo
+
+Check out the working version of this app here:  
+[https://mrubanenko.github.io/react-todolist](https://mrubanenko.github.io/react-todolist)
+
 ## Features
 
 - Add, delete, and edit tasks  
