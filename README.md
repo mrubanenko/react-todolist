@@ -1,12 +1,31 @@
-# React + Vite
+# React ToDo App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A feature-rich ToDo application built with React and Tailwind CSS for managing tasks efficiently.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Add, delete, and edit tasks  
+- Add and modify task deadlines  
+- Delete all completed tasks with one click  
+- Task filtering: All / Active / Completed  
+- Dark and light theme toggle  
+- Drag & Drop to reorder tasks  
+- Mock database simulation using MockAPI (server-like requests)  
+- Reusable custom hooks and components  
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **React 18**  
+- **Tailwind CSS**  
+- **MockAPI**  
+- LocalStorage for local state persistence  
+
+## Installation & Running
+
+Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/username/my-todo-app.git
+cd my-todo-app
+npm install
+npm start
