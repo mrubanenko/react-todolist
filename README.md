@@ -2,6 +2,10 @@
 
 A feature-rich ToDo application built with React and Tailwind CSS for managing tasks efficiently.
 
+## Screenshot
+
+![React ToDo App Screenshot](./src/assets/screenshot.png)
+
 ## Live Demo
 
 Check out the working version of this app here:  
