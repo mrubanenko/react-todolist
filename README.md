@@ -34,7 +34,7 @@ Check out the working version of this app here:
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/username/my-todo-app.git
-cd my-todo-app
+git clone https://github.com/mrubanenko/todo-list-react.git
+cd todo-list-react
 npm install
-npm start
+npm run dev
